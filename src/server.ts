@@ -21,6 +21,33 @@ const weatherServer = new McpServer({
   version: '0.1.0',
 });
 
+const widgetShellUri = 'weather-widget://shell';
+
+const widgetShellMarkup = `
+<div id="weather-root"></div>
+<link rel="stylesheet" href="/widget.css" />
+<script type="module" src="/widget.js"></script>
+`;
+
+weatherServer.registerResource(
+  'weather_widget_shell',
+  widgetShellUri,
+  {
+    title: 'Weather widget shell',
+    description: 'HTML scaffold that mounts the weather forecast widget.',
+    mimeType: 'text/html+skybridge',
+  },
+  async () => ({
+    contents: [
+      {
+        uri: widgetShellUri,
+        mimeType: 'text/html+skybridge',
+        text: widgetShellMarkup.trim(),
+      },
+    ],
+  })
+);
+
 const WeatherInputShape = {
   lat: z
     .number()
@@ -61,6 +88,9 @@ weatherServer.registerTool(
     description: 'Fetches current weather conditions using OpenWeatherMap.',
     inputSchema: WeatherInputShape,
     outputSchema: WeatherOutputShape,
+    _meta: {
+      'openai/outputTemplate': 'ui://widget/weather-forecast',
+    },
   },
   async ({ lat, lon }) => {
     if (!OWM_API_KEY) {
