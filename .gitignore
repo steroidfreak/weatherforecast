@@ -1,0 +1,17 @@
+# Node/TypeScript build output
+dist/
+node_modules/
+
+# Environment configuration
+.env
+.env.local
+.env.*.local
+
+# Debugging & tooling artifacts
+*.tsbuildinfo
+TestResults/
+coverage/
+
+# OS-specific clutter
+.DS_Store
+Thumbs.db
