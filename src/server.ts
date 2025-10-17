@@ -24,7 +24,7 @@ const weatherServer = new McpServer({
 const widgetShellUri = 'weather-widget://shell';
 
 const widgetShellMarkup = `
-<div id="weather-root"></div>
+<div id="root"></div>
 <link rel="stylesheet" href="/widget.css" />
 <script type="module" src="/widget.js"></script>
 `;
