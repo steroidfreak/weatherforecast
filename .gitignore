@@ -12,6 +12,10 @@ node_modules/
 TestResults/
 coverage/
 
+# Widget build artifacts
+public/widget.js
+public/widget.js.map
+
 # OS-specific clutter
 .DS_Store
 Thumbs.db

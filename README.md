@@ -19,12 +19,17 @@ This project hosts a minimal OpenAI Apps experience that exposes a Model Context
    Set `OWM_API_KEY` to your OpenWeatherMap key. Optionally change `PORT` (defaults to `3000`).
 
 ## Local Development
-1. Start the MCP/Express server with hot reload:
+1. Build the widget bundle (rerun when you make React changes):
+   ```bash
+   npm run build:widget
+   ```
+   For live-updating the bundle during development, run `npm run widget:dev` in a separate terminal.
+2. Start the MCP/Express server with hot reload:
    ```bash
    npm run dev
    ```
    The server exposes the MCP endpoint at `http://localhost:3000/mcp` and serves the widget at `http://localhost:3000/`.
-2. In a second terminal, open an HTTPS tunnel:
+3. In another terminal, open an HTTPS tunnel:
    ```bash
    npm run tunnel
    ```
@@ -36,7 +41,7 @@ This project hosts a minimal OpenAI Apps experience that exposes a Model Context
 3. Set the widget URL in the app to the same ngrok base (without `/mcp`). When the widget loads, it automatically invokes `window.openai.callTool('get_weather', { lat: 37.7749, lon: -122.4194 })` and displays the inline weather card.
 
 ## Production Build
-1. Compile the TypeScript sources:
+1. Compile the TypeScript sources and widget bundle:
    ```bash
    npm run build
    ```
