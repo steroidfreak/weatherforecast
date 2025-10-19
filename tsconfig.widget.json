@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": ["widget/**/*.ts", "widget/**/*.tsx", "widget/**/*.d.ts"],
-  "exclude": ["dist", "node_modules"]
-}
