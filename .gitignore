@@ -1,21 +1,6 @@
-# Node/TypeScript build output
-dist/
 node_modules/
-
-# Environment configuration
+web/dist/
+web/node_modules/
 .env
-.env.local
-.env.*.local
-
-# Debugging & tooling artifacts
-*.tsbuildinfo
-TestResults/
-coverage/
-
-# Widget build artifacts
-public/widget.js
-public/widget.js.map
-
-# OS-specific clutter
+*.log
 .DS_Store
-Thumbs.db
