@@ -22,11 +22,12 @@ const KANBAN_CSS = (() => {
 
 // UI resource (no inline data assignment; host will inject data)
 server.registerResource(
-    'kanban-widget',
+    'ui://widget/kanban-board.html',
     'ui://widget/kanban-board.html',
     {
         title: 'Kanban Board Widget',
-        description: 'Interactive Kanban board UI'
+        description: 'Interactive Kanban board UI',
+        mimeType: 'text/html+skybridge'
     },
     async () => ({
         contents: [
@@ -61,12 +62,15 @@ server.registerTool(
             'openai/toolInvocation/invoking': 'Displaying the board',
             'openai/toolInvocation/invoked': 'Displayed the board'
         },
-        inputSchema: { 
-            tasks: z.string().optional().describe('JSON string of tasks to display')
-        }
+        inputSchema: z.object({
+            tasks: z
+                .string()
+                .optional()
+                .describe('JSON string of tasks to display')
+        })
     },
     async ({ tasks }) => {
-        const defaultTasks = JSON.stringify([
+        const fallbackTasks = [
             {
                 id: 'task-101',
                 title: 'Design dashboard wireframes',
@@ -94,11 +98,26 @@ server.registerTool(
                 dueDate: '2025-10-19',
                 status: 'done'
             }
-        ]);
+        ];
+
+        let selectedTasks = fallbackTasks;
+
+        if (tasks) {
+            try {
+                const parsed = JSON.parse(tasks);
+                if (Array.isArray(parsed)) {
+                    selectedTasks = parsed;
+                } else {
+                    console.warn('Received tasks payload that is not an array; falling back to defaults.');
+                }
+            } catch (error) {
+                console.warn('Failed to parse tasks payload; falling back to defaults.', error);
+            }
+        }
 
         return {
             content: [{ type: 'text', text: 'Displayed the kanban board!' }],
-            structuredContent: { tasks: tasks || defaultTasks }
+            structuredContent: { tasks: selectedTasks }
         };
     }
 );
