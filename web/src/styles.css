@@ -82,11 +82,73 @@ body {
   transform: translateY(-2px);
 }
 
-.task-content {
-  font-size: 14px;
-  color: #1f2937;
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.task-content {
+  margin-bottom: 12px;
+}
+
+.task-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.task-description {
+  font-size: 13px;
+  color: #4b5563;
   line-height: 1.5;
+}
+
+.task-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.priority-high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.priority-medium {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.priority-low {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.task-assignee {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-due {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
 }
 
 .task-actions {

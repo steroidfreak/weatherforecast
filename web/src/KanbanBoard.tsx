@@ -3,6 +3,10 @@ import { useState } from 'react'
 interface Task {
   id: string;
   title: string;
+  description: string;
+  assignee: string;
+  priority: 'low' | 'medium' | 'high';
+  dueDate: string;
   status: 'todo' | 'in-progress' | 'done';
 }
 
@@ -11,6 +15,19 @@ interface KanbanBoardProps {
   onMoveTask: (taskId: string, newStatus: Task['status']) => void;
   onAddTask: (title: string, status: Task['status']) => void;
 }
+
+const formatDueDate = (dueDate: string) => {
+  if (!dueDate) {
+    return 'Date TBD';
+  }
+
+  const parsed = new Date(`${dueDate}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    return 'Date TBD';
+  }
+
+  return parsed.toLocaleDateString();
+};
 
 const KanbanBoard = ({ tasks, onMoveTask, onAddTask }: KanbanBoardProps) => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -48,28 +65,50 @@ const KanbanBoard = ({ tasks, onMoveTask, onAddTask }: KanbanBoardProps) => {
                 .filter(task => task.status === column.id)
                 .map(task => (
                   <div key={task.id} className="task-card">
-                    <div className="task-content">{task.title}</div>
-                    <div className="task-actions">
-                      {column.id !== 'todo' && (
-                        <button
-                          onClick={() => onMoveTask(task.id, 
-                            column.id === 'done' ? 'in-progress' : 'todo'
-                          )}
-                          className="btn-move"
-                        >
-                          ←
-                        </button>
-                      )}
-                      {column.id !== 'done' && (
-                        <button
-                          onClick={() => onMoveTask(task.id,
-                            column.id === 'todo' ? 'in-progress' : 'done'
-                          )}
-                          className="btn-move"
-                        >
-                          →
-                        </button>
-                      )}
+                    <div className="task-meta">
+                      <span className={`task-badge priority-${task.priority}`}>
+                        {task.priority.toUpperCase()}
+                      </span>
+                      <span className="task-assignee">{task.assignee}</span>
+                    </div>
+                    <div className="task-content">
+                      <div className="task-title">{task.title}</div>
+                      <div className="task-description">{task.description}</div>
+                    </div>
+                    <div className="task-footer">
+                      <span className="task-due">Due {formatDueDate(task.dueDate)}</span>
+                      <div className="task-actions">
+                        {column.id !== 'todo' && (
+                          <button
+                            onClick={() =>
+                              onMoveTask(
+                                task.id,
+                                column.id === 'done' ? 'in-progress' : 'todo'
+                              )
+                            }
+                            className="btn-move"
+                            aria-label="Move task backward"
+                            type="button"
+                          >
+                            {'<'}
+                          </button>
+                        )}
+                        {column.id !== 'done' && (
+                          <button
+                            onClick={() =>
+                              onMoveTask(
+                                task.id,
+                                column.id === 'todo' ? 'in-progress' : 'done'
+                              )
+                            }
+                            className="btn-move"
+                            aria-label="Move task forward"
+                            type="button"
+                          >
+                            {'>'}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -86,18 +125,19 @@ const KanbanBoard = ({ tasks, onMoveTask, onAddTask }: KanbanBoardProps) => {
                   onKeyPress={(e) => e.key === 'Enter' && handleAddTask(column.id)}
                 />
                 <div className="form-actions">
-                  <button onClick={() => handleAddTask(column.id)} className="btn-add">
+                  <button onClick={() => handleAddTask(column.id)} className="btn-add" type="button">
                     Add
                   </button>
-                  <button onClick={() => setAddingTo(null)} className="btn-cancel">
+                  <button onClick={() => setAddingTo(null)} className="btn-cancel" type="button">
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={() => setAddingTo(column.id)}
                 className="btn-new-task"
+                type="button"
               >
                 + Add Task
               </button>

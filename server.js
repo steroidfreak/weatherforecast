@@ -66,9 +66,39 @@ server.registerTool(
         }
     },
     async ({ tasks }) => {
+        const defaultTasks = JSON.stringify([
+            {
+                id: 'task-101',
+                title: 'Design dashboard wireframes',
+                description: 'Create responsive wireframes for the analytics dashboard.',
+                assignee: 'Sasha',
+                priority: 'high',
+                dueDate: '2025-10-28',
+                status: 'todo'
+            },
+            {
+                id: 'task-201',
+                title: 'Set up CI pipeline',
+                description: 'Configure GitHub Actions with lint and unit test steps.',
+                assignee: 'Jordan',
+                priority: 'high',
+                dueDate: '2025-10-21',
+                status: 'in-progress'
+            },
+            {
+                id: 'task-301',
+                title: 'Ship notification service',
+                description: 'Deploy the notification microservice to the staging cluster.',
+                assignee: 'Morgan',
+                priority: 'high',
+                dueDate: '2025-10-19',
+                status: 'done'
+            }
+        ]);
+
         return {
             content: [{ type: 'text', text: 'Displayed the kanban board!' }],
-            structuredContent: { tasks: tasks || '{}' }
+            structuredContent: { tasks: tasks || defaultTasks }
         };
     }
 );
