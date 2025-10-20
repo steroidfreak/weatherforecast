@@ -62,12 +62,12 @@ server.registerTool(
             'openai/toolInvocation/invoking': 'Displaying the board',
             'openai/toolInvocation/invoked': 'Displayed the board'
         },
-        inputSchema: z.object({
+        inputSchema: {
             tasks: z
                 .string()
                 .optional()
                 .describe('JSON string of tasks to display')
-        })
+        }
     },
     async ({ tasks }) => {
         const fallbackTasks = [
