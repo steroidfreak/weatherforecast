@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import KanbanBoard from './KanbanBoard'
+import { useOpenAiGlobal, useToolOutput, useWidgetState } from './openai'
 
 interface Task {
   id: string;
@@ -86,39 +87,51 @@ const seededTasks: Task[] = [
   }
 ];
 
+const DEFAULT_WIDGET_STATE_KEY = 'tasks'
+
 function App() {
-  const [tasks, setTasks] = useState<Task[]>(seededTasks);
+  const theme = useOpenAiGlobal('theme')
+  const displayMode = useOpenAiGlobal('displayMode')
+  const maxHeight = useOpenAiGlobal('maxHeight')
+  const safeArea = useOpenAiGlobal('safeArea')
+  const toolOutput = useToolOutput<{ tasks?: Task[] } | null>()
+  const widgetState = useWidgetState<{ tasks?: Task[] } | null>()
 
-  // Listen for data from MCP server (if needed)
+  const [tasks, setTasks] = useState<Task[]>(seededTasks)
+
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.tasks) {
-        try {
-          const parsedTasks = JSON.parse(event.data.tasks);
-          if (Array.isArray(parsedTasks)) {
-            setTasks(parsedTasks);
-          } else {
-            console.warn('Ignoring non-array tasks payload from message event.');
-          }
-        } catch (e) {
-          console.error('Failed to parse tasks:', e);
-        }
+    const candidate = toolOutput?.tasks ?? widgetState?.tasks
+    if (candidate && Array.isArray(candidate)) {
+      setTasks(prev => {
+        const areEqual = JSON.stringify(prev) === JSON.stringify(candidate)
+        return areEqual ? prev : candidate
+      })
+    }
+  }, [toolOutput, widgetState])
+
+  const syncTasks = useCallback((updater: (previous: Task[]) => Task[]) => {
+    setTasks(prev => {
+      const next = updater(prev)
+      if (typeof window !== 'undefined' && window.openai?.setWidgetState) {
+        const existingState = (widgetState ?? {}) as Record<string, unknown>
+        void window.openai.setWidgetState({
+          ...existingState,
+          [DEFAULT_WIDGET_STATE_KEY]: next
+        })
       }
-    };
+      return next
+    })
+  }, [widgetState])
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  const moveTask = (taskId: string, newStatus: Task['status']) => {
-    setTasks(prev => prev.map(task => 
+  const moveTask = useCallback((taskId: string, newStatus: Task['status']) => {
+    syncTasks(prev => prev.map(task =>
       task.id === taskId ? { ...task, status: newStatus } : task
-    ));
-  };
+    ))
+  }, [syncTasks])
 
-  const addTask = (title: string, status: Task['status']) => {
-    const defaultDueDate = new Date();
-    defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+  const addTask = useCallback((title: string, status: Task['status']) => {
+    const defaultDueDate = new Date()
+    defaultDueDate.setDate(defaultDueDate.getDate() + 7)
 
     const newTask: Task = {
       id: `task-${Date.now()}`,
@@ -128,17 +141,31 @@ function App() {
       priority: 'medium',
       dueDate: defaultDueDate.toISOString().slice(0, 10),
       status
-    };
-    setTasks(prev => [...prev, newTask]);
-  };
+    }
+
+    syncTasks(prev => [...prev, newTask])
+  }, [syncTasks])
+
+  const containerStyle: CSSProperties = {
+    maxHeight: Number.isFinite(maxHeight) && maxHeight > 0 ? maxHeight : undefined,
+    paddingBottom: safeArea?.insets?.bottom ?? 0,
+    paddingLeft: safeArea?.insets?.left ?? 0,
+    paddingRight: safeArea?.insets?.right ?? 0,
+    paddingTop: safeArea?.insets?.top ?? 0
+  }
 
   return (
-    <KanbanBoard 
-      tasks={tasks} 
-      onMoveTask={moveTask}
-      onAddTask={addTask}
-    />
-  );
+    <div
+      className={`app-container theme-${theme} display-${displayMode}`}
+      style={containerStyle}
+    >
+      <KanbanBoard
+        tasks={tasks}
+        onMoveTask={moveTask}
+        onAddTask={addTask}
+      />
+    </div>
+  )
 }
 
 export default App
